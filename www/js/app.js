@@ -5,7 +5,8 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
+var db;
+angular.module('starter', ['ionic','ngCordova', 'starter.controllers', 'starter.services'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -20,6 +21,13 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     }
+    if(window.cordova){
+        bd=$cordovaSQLite.openDB("practica2_agenda.db");
+    }
+    else{
+        db=window.openDatabase("practica2_agenda.db","1","Aplicacion","-1");
+    }
+    $cordovaSQLite.execute(db,'CREATE TABLE IF NOT EXIST agenda(id INTEGER PRIMARY KEY AUTOINCREMENT, nombre varchar(255), apeliido varchar(255), telefono varchar(255), email varchar(255))');
   });
 })
 

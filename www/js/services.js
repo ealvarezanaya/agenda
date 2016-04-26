@@ -1,50 +1,62 @@
 angular.module('starter.services', [])
 
-.factory('Chats', function() {
+.factory('Chats', function($cordovaSQLite) {
   // Might use a resource here that returns a JSON array
 
   // Some fake testing data
-  var chats = [{
-    id: 0,
-    name: 'Ben Sparrow',
-    lastText: 'You on your way?',
-    face: 'img/ben.png'
-  }, {
-    id: 1,
-    name: 'Max Lynx',
-    lastText: 'Hey, it\'s me',
-    face: 'img/max.png'
-  }, {
-    id: 2,
-    name: 'Adam Bradleyson',
-    lastText: 'I should buy a boat',
-    face: 'img/adam.jpg'
-  }, {
-    id: 3,
-    name: 'Perry Governor',
-    lastText: 'Look at my mukluks!',
-    face: 'img/perry.png'
-  }, {
-    id: 4,
-    name: 'Mike Harrington',
-    lastText: 'This is wicked good ice cream.',
-    face: 'img/mike.png'
-  }];
+  var chats = [];
+  var chatObj="0";
 
   return {
     all: function() {
-      return chats;
-    },
-    remove: function(chat) {
-      chats.splice(chats.indexOf(chat), 1);
-    },
-    get: function(chatId) {
-      for (var i = 0; i < chats.length; i++) {
-        if (chats[i].id === parseInt(chatId)) {
-          return chats[i];
+    
+    chats=[];
+    
+    $cordovaSQLite.execute(db,'SELECT + FROM agenda ORDER BY id DESC').then
+    (function(result){
+        if(result.rows.lenght > 0){
+            for(var i=0;i<result.rows.lenght;i++)
+            {
+                chats.push({"id":result.rows.item(i).id,
+                    "nombre":result.rows.item(i).nombre,
+                    "apellido":result.rows.item(i).apellido,
+                    "telefono":result.rows.item(i).telefono,
+                    "email":result.rows.item(i).email});
+            }
         }
-      }
-      return null;
+    },
+        function(error){
+        statusMessage="Error on loading:" + erros.message;
+    }
+    );
+    return chats;
+    },
+    remove:function(chat){
+        $cordovaSQLite.execute(db,'DELETE FROM agenda where id=?',[chat.id])
+        .then(function(result){
+            statusMessage="Borrado";
+            chats.splice(chats.indexOf(chat),1);
+        });
+    },
+    get:function(chatId){
+        chats =[];
+        $cordovaSQLite.execute(db,'SELECT * FROM agenda where id=?',[chatId])
+        .then(
+            function(result){
+              if(result.rows.lenght>0){
+                  chats.push({"id":result.rows.item(0).id,
+                      "nombre":result.rows.item(0).nombre,
+                      "apellido":result.rows.item(0).apellido,
+                      "telefono":result.rows.item(0).telefono,
+                      "email":result.rows.item(0).email});
+              }  
+            },
+            function(error){
+                statusMessage="Error on loading:" + error.message;
+            }
+            );
+            return chats;
     }
   };
+  
 });
